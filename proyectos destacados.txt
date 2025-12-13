@@ -1,0 +1,20 @@
+
+                            <div class="projects-section">
+                                <h3 class="section-title">Proyectos Destacados</h3>
+                                <div class="project-card">
+                                    <div class="project-header">
+                                        <i class="fas fa-folder-open"></i>
+                                        <span>Visual Novel Engine</span>
+                                    </div>
+                                    <p class="project-description">Motor de novelas visuales en Ren'Py</p>
+                                    <div class="project-stats">
+                                        <span><i class="fas fa-star"></i> 42</span>
+                                        <span><i class="fas fa-code-branch"></i> 8</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                Iba en la linea 116, solo copiar y pegar    
