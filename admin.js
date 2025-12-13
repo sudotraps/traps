@@ -352,3 +352,4 @@ function createPostHTML(post) {
         </article>
     `;
 }
+
