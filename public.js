@@ -3,6 +3,8 @@ const userProfile = {
  memberSince: new Date('2020-03-31T12:00:00'),
     roles: [
         { name: 'Desarrollador de Javascript', color: '#f7df1e' },
+        { name: 'Desarrollador de C++', color: '#5c8dbc' },
+        { name: 'Desarrollador de C#', color: '#953dac' },
         { name: 'Programador', color: '#8b5cf6' },
         { name: 'Estudiante', color: '#f59e0b' },
         { name: 'Gamer', color: '#ef4444' }
@@ -125,3 +127,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPosts();
     addAnimations();
 });
+
