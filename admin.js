@@ -59,92 +59,33 @@ function clearForm() {
 }
 
 
-// ✅ FUNCIÓN AGREGADA - Redimensionar imagen a 16:9
-async function resizeImageTo16x9(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        
-        reader.onerror = () => reject(new Error('Error al leer el archivo'));
-        
-        reader.onload = (e) => {
-            const img = new Image();
-            
-            img.onerror = () => reject(new Error('Error al cargar la imagen'));
-            
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Calcular dimensiones 16:9
-                const targetRatio = 16 / 9;
-                let width = img.width;
-                let height = img.height;
-                const imgRatio = width / height;
-                
-                // Ajustar al ratio 16:9 (crop center)
-                if (imgRatio > targetRatio) {
-                    // Imagen muy ancha, recortar los lados
-                    width = height * targetRatio;
-                } else {
-                    // Imagen muy alta, recortar arriba/abajo
-                    height = width / targetRatio;
-                }
-                
-                // Establecer tamaño del canvas (máximo 1920px de ancho)
-                const maxWidth = 1920;
-                canvas.width = Math.min(width, maxWidth);
-                canvas.height = canvas.width / targetRatio;
-                
-                // Calcular offset para centrar el crop
-                const offsetX = (img.width - width) / 2;
-                const offsetY = (img.height - height) / 2;
-                
-                // Dibujar imagen redimensionada y recortada
-                ctx.drawImage(
-                    img,
-                    offsetX, offsetY, width, height,  // source
-                    0, 0, canvas.width, canvas.height  // destination
-                );
-                
-                // Convertir a base64 (JPEG con 85% calidad)
-                resolve(canvas.toDataURL('image/jpeg', 0.85));
-            };
-            
-            img.src = e.target.result;
-        };
-        
-        reader.readAsDataURL(file);
-    });
-}
 
 
-async function handleImageUpload(e) {
+
+function handleImageUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
         alert('⚠️ Selecciona una imagen');
-        e.target.value = '';
         return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
         alert('⚠️ Imagen muy grande. Máximo 5MB');
-        e.target.value = '';
         return;
     }
 
-    try {
-        // Redimensionar a 16:9
-        currentImage = await resizeImageTo16x9(file);
+    // Leer la imagen tal cual es
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        currentImage = event.target.result;
         document.getElementById('previewImg').src = currentImage;
         document.getElementById('imagePreview').style.display = 'block';
-    } catch (error) {
-        console.error('Error al procesar imagen:', error);
-        alert('❌ Error al procesar la imagen');
-        e.target.value = '';
-    }
+    };
+    reader.readAsDataURL(file);
 }
+
 
 
 function removeImage() {
@@ -352,4 +293,5 @@ function createPostHTML(post) {
         </article>
     `;
 }
+
 
