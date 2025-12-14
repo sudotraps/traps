@@ -1,297 +1,137 @@
-let isAuthenticated = false;
-let posts = [];
-let editingPostId = null;
-let currentImage = null;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Blog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container-fluid main-wrapper">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-lg-10 col-xl-8">
+                
+                <div class="auth-panel" id="authPanel">
+                    <div class="auth-container">
+                        <h3>🔒 Panel de Administración</h3>
+                        <p>Ingresa tu contraseña para gestionar el blog</p>
+                        <input 
+                            type="password" 
+                            id="adminPassword" 
+                            class="form-control-custom" 
+                            placeholder="Contraseña..."
+                            onkeypress="if(event.key === 'Enter') checkPassword()"
+                        >
+                        <button class="btn-login" onclick="checkPassword()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Iniciar Sesión
+                        </button>
+                        <a href="/" class="btn-back">
+                            <i class="fas fa-arrow-left"></i>
+                            Volver al sitio público
+                        </a>
+                    </div>
+                </div>
 
+                <div class="admin-panel" id="adminPanel" style="display: none;">
+                    <div class="blog-section">
+                        <div class="blog-header">
+                            <h2 class="blog-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Panel de Administración
+                            </h2>
+                            <div class="header-actions">
+                                <button class="btn-new-post" id="btnNewPost">
+                                    <i class="fas fa-plus"></i>
+                                    Nueva Publicación
+                                </button>
+                                <a href="/" class="btn-view-public">
+                                    <i class="fas fa-eye"></i>
+                                    Ver Sitio
+                                </a>
+                                <button class="btn-logout" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Cerrar Sesión
+                                </button>
+                            </div>
+                        </div>
 
-function checkPassword() {
-    const password = document.getElementById('adminPassword').value;
-    
-    if (password === ADMIN_PASSWORD) {
-        isAuthenticated = true;
-        document.getElementById('authPanel').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadPosts();
-        setupEventListeners();
-    } else {
-        alert('❌ Contraseña incorrecta');
-        document.getElementById('adminPassword').value = '';
-    }
-}
+                        <div class="post-form" id="postForm" style="display: none;">
+                            <div class="form-header">
+                                <h3>✍️ Crear Nueva Publicación</h3>
+                                <button class="btn-close-form" id="btnCloseForm">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="postTitle" 
+                                class="form-control-custom" 
+                                placeholder="Título del post..."
+                                maxlength="100"
+                            >
+                            <select id="postCategory" class="form-control-custom">
+                                <option value="desarrollo">💻 Desarrollo</option>
+                                <option value="gaming">🎮 Gaming</option>
+                                <option value="aprendizaje">📚 Aprendizaje</option>
+                                <option value="proyectos">🚀 Proyectos</option>
+                                <option value="personal">✨ Personal</option>
+                            </select>
+                            <textarea 
+                                id="postContent" 
+                                class="form-control-custom" 
+                                placeholder="Escribe tu contenido aquí..."
+                                rows="6"
+                            ></textarea>
+                            
+                            <div class="image-upload-section">
+                                <label class="image-upload-label">
+                                    <i class="fas fa-image"></i>
+                                    Agregar Imagen 16:9 (Opcional)
+                                    <input 
+                                        type="file" 
+                                        id="postImage" 
+                                        accept="image/*"
+                                        style="display: none;"
+                                    >
+                                </label>
+                                <div id="imagePreview" class="image-preview" style="display: none;">
+                                    <img id="previewImg" src="" alt="Preview">
+                                    <button class="btn-remove-image" id="btnRemoveImage" type="button">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
 
+                            <div class="form-actions">
+                                <button class="btn-cancel" id="btnCancel">Cancelar</button>
+                                <button class="btn-publish" id="btnPublish">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Publicar
+                                </button>
+                            </div>
+                        </div>
 
-function logout() {
-    isAuthenticated = false;
-    document.getElementById('authPanel').style.display = 'block';
-    document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('adminPassword').value = '';
-}
+                        <div class="posts-container" id="postsContainer"></div>
 
-
-function setupEventListeners() {
-    document.getElementById('btnNewPost').onclick = showForm;
-    document.getElementById('btnCloseForm').onclick = hideForm;
-    document.getElementById('btnCancel').onclick = hideForm;
-    document.getElementById('btnPublish').onclick = publishPost;
-    document.getElementById('postImage').onchange = handleImageUpload;
-    document.getElementById('btnRemoveImage').onclick = removeImage;
-}
-
-
-function showForm() {
-    document.getElementById('postForm').style.display = 'block';
-    document.getElementById('postTitle').focus();
-}
-
-
-function hideForm() {
-    document.getElementById('postForm').style.display = 'none';
-    clearForm();
-}
-
-
-function clearForm() {
-    document.getElementById('postTitle').value = '';
-    document.getElementById('postContent').value = '';
-    document.getElementById('postCategory').value = 'desarrollo';
-    removeImage();
-    editingPostId = null;
-}
-
-
-
-
-
-function handleImageUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-        alert('⚠️ Selecciona una imagen');
-        return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-        alert('⚠️ Imagen muy grande. Máximo 5MB');
-        return;
-    }
-
-    // Leer la imagen tal cual es
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        currentImage = event.target.result;
-        document.getElementById('previewImg').src = currentImage;
-        document.getElementById('imagePreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-}
-
-
-
-function removeImage() {
-    currentImage = null;
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('postImage').value = '';
-}
-
-
-async function publishPost() {
-    const title = document.getElementById('postTitle').value.trim();
-    const content = document.getElementById('postContent').value.trim();
-    const category = document.getElementById('postCategory').value;
-
-    if (!title || !content) {
-        alert('⚠️ Completa título y contenido');
-        return;
-    }
-
-    try {
-        if (editingPostId) {
-            await updatePost(editingPostId, title, content, category, currentImage);
-        } else {
-            await createPost(title, content, category, currentImage);
-        }
-
-        hideForm();
-        await loadPosts();
-        alert('✅ Post guardado correctamente');
-    } catch (error) {
-        console.error('Error al guardar:', error);
-        alert('❌ Error al guardar el post: ' + error.message);
-    }
-}
-
-
-async function createPost(title, content, category, image) {
-    const { data, error } = await supabase
-        .from('posts')
-        .insert([
-            {
-                title,
-                content,
-                category,
-                image,
-                date: new Date().toISOString(),
-                edited: false
-            }
-        ])
-        .select();
-
-    if (error) throw error;
-    return data;
-}
-
-
-async function updatePost(id, title, content, category, image) {
-    const updateData = {
-        title,
-        content,
-        category,
-        edited: true
-    };
-
-    if (image !== null) {
-        updateData.image = image;
-    }
-
-    const { data, error } = await supabase
-        .from('posts')
-        .update(updateData)
-        .eq('id', id)
-        .select();
-
-    if (error) throw error;
-    return data;
-}
-
-
-async function deletePost(id) {
-    if (!confirm('¿Eliminar esta publicación?')) return;
-    
-    try {
-        const { error } = await supabase
-            .from('posts')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-
-        await loadPosts();
-        alert('✅ Post eliminado');
-    } catch (error) {
-        console.error('Error al eliminar:', error);
-        alert('❌ Error al eliminar: ' + error.message);
-    }
-}
-
-
-async function editPost(id) {
-    const post = posts.find(p => p.id === id);
-    if (!post) return;
-
-    document.getElementById('postTitle').value = post.title;
-    document.getElementById('postContent').value = post.content;
-    document.getElementById('postCategory').value = post.category;
-    
-    if (post.image) {
-        currentImage = post.image;
-        document.getElementById('previewImg').src = post.image;
-        document.getElementById('imagePreview').style.display = 'block';
-    }
-    
-    editingPostId = id;
-    showForm();
-}
-
-
-async function loadPosts() {
-    try {
-        const { data, error } = await supabase
-            .from('posts')
-            .select('*')
-            .order('date', { ascending: false });
-
-        if (error) throw error;
-
-        posts = data || [];
-        renderPosts();
-    } catch (error) {
-        console.error('Error al cargar posts:', error);
-        alert('❌ Error al cargar posts: ' + error.message);
-        posts = [];
-        renderPosts();
-    }
-}
-
-
-function renderPosts() {
-    const container = document.getElementById('postsContainer');
-    const emptyBlog = document.getElementById('emptyBlog');
-
-    if (posts.length === 0) {
-        container.innerHTML = '';
-        emptyBlog.style.display = 'block';
-        return;
-    }
-
-    emptyBlog.style.display = 'none';
-    container.innerHTML = posts.map(post => createPostHTML(post)).join('');
-}
-
-
-function createPostHTML(post) {
-    const date = new Date(post.date);
-    const formattedDate = date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    const formattedTime = date.toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    const categoryIcons = {
-        desarrollo: '💻',
-        gaming: '🎮',
-        aprendizaje: '📚',
-        proyectos: '🚀',
-        personal: '✨'
-    };
-
-    const imageHTML = post.image ? `
-        <div class="post-image-container">
-            <img src="${post.image}" alt="${post.title}" class="post-image">
-        </div>
-    ` : '';
-
-    return `
-        <article class="blog-post">
-            <div class="post-header-content">
-                <div class="post-title-group">
-                    <span class="post-category category-${post.category}">
-                        ${categoryIcons[post.category]} ${post.category.charAt(0).toUpperCase() + post.category.slice(1)}
-                    </span>
-                    <h3>${post.title}</h3>
-                    <div class="post-meta">
-                        <span><i class="fas fa-calendar"></i> ${formattedDate}</span>
-                        <span><i class="fas fa-clock"></i> ${formattedTime}</span>
-                        ${post.edited ? '<span><i class="fas fa-edit"></i> Editado</span>' : ''}
+                        <div class="empty-blog" id="emptyBlog">
+                            <i class="fas fa-pen-fancy"></i>
+                            <p>Aún no hay publicaciones</p>
+                            <p class="empty-subtitle">¡Crea tu primera publicación!</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            ${imageHTML}
-            <div class="post-content">${post.content}</div>
-            <div class="post-actions">
-                <button class="btn-edit" onclick="editPost(${post.id})">
-                    <i class="fas fa-pen"></i> Editar
-                </button>
-                <button class="btn-delete" onclick="deletePost(${post.id})">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            </div>
-        </article>
-    `;
-}
+        </div>
+    </div>
 
-
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
