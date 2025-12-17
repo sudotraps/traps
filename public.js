@@ -1,12 +1,3 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
-
-<script>
-  const SUPABASE_URL = 'https://txhofuhrcvmskbrbvcit.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_fU3lmsGzsLld4xzqzfZG8w_ENZMM6_y';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-
 const userProfile = {
     username: "T R A P S",
  memberSince: new Date('2020-03-31T12:00:00'),
@@ -136,5 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPosts();
     addAnimations();
 });
+
 
 
