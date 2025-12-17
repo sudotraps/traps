@@ -125,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRoles();
     updateMemberSince();
     loadPosts();
-    addAnimations();
 });
+
 
 
 
